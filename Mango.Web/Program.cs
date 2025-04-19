@@ -15,13 +15,14 @@ ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProt
 
 // **Get API URL from Configuration**
 SD.CouponAPIBase = builder.Configuration["ServiceUrls:CouponAPI"];
-if (string.IsNullOrEmpty(SD.CouponAPIBase))
+SD.AuthAPIBase = builder.Configuration["ServiceUrls:AuthAPI"];
+if (string.IsNullOrEmpty(SD.AuthAPIBase))
 {
     Console.WriteLine("⚠️ Error: CouponAPI Base URL is missing in configuration.");
 }
 else
 {
-    Console.WriteLine($"✅ Using Coupon API Base URL: {SD.CouponAPIBase}");
+    Console.WriteLine($"✅ Using Coupon API Base URL: {SD.AuthAPIBase}");
 }
 
 // **Create Custom HttpClientHandler with Conditional SSL Bypass**
@@ -48,14 +49,18 @@ else
 }
 
 // **Register HttpClient with Custom Handler**
+builder.Services.AddHttpClient<IAuthService, AuthService>();
 builder.Services.AddHttpClient<ICouponService, CouponService>()
     .ConfigurePrimaryHttpMessageHandler(() => httpClientHandler);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITokenProvider, TokenProvider>();
 builder.Services.AddScoped<IBaseService, BaseService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
+
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
