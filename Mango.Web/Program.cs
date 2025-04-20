@@ -17,6 +17,7 @@ ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProt
 SD.CouponAPIBase = builder.Configuration["ServiceUrls:CouponAPI"];
 SD.AuthAPIBase = builder.Configuration["ServiceUrls:AuthAPI"];
 SD.ProductAPIBase = builder.Configuration["ServiceUrls:ProductAPI"];
+SD.ShoppingCartAPIBase = builder.Configuration["ServiceUrls:ShoppingCartAPI"];
 if (string.IsNullOrEmpty(SD.AuthAPIBase))
 {
     Console.WriteLine("⚠️ Error: CouponAPI Base URL is missing in configuration.");
@@ -55,6 +56,8 @@ builder.Services.AddHttpClient<ICouponService, CouponService>()
     .ConfigurePrimaryHttpMessageHandler(() => httpClientHandler);
 builder.Services.AddHttpClient<IProductService, ProductService>()
     .ConfigurePrimaryHttpMessageHandler(() => httpClientHandler);
+builder.Services.AddHttpClient<IShoppingCartService, ShoppingCartService>()
+    .ConfigurePrimaryHttpMessageHandler(() => httpClientHandler);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -64,6 +67,7 @@ builder.Services.AddScoped<IBaseService, BaseService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
