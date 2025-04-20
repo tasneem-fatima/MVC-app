@@ -2,6 +2,7 @@
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Models;
 using Mango.Services.ShoppingCartAPI.Models.Dto;
+using Mango.Services.ShoppingCartAPI.Service.IService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,12 +15,14 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         private ResponseDto _response;
         private IMapper _mapper;
         private readonly AppDbContext _appDbContext;
-
+        private readonly IProductService _productService;
         public CartAPIController(AppDbContext appDbContext,
-            IMapper mapper)
+            IMapper mapper,
+            IProductService productService)
         {
             
             _appDbContext = appDbContext;
+            _productService = productService;
             this._response = new ResponseDto();
             _mapper = mapper;
         }
@@ -35,9 +38,11 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                 };
                 cart.CartDetails = _mapper.Map<IEnumerable<CartDetailsDto>>(_appDbContext.CartDetails.
                     Where(u=>u.CartHeaderId==cart.CartHeader.CartHeaderId));
-
+                IEnumerable<ProductDto> productDto = await _productService.GetProducts();
                 foreach (var item in cart.CartDetails)
                 {
+                    item.Product = productDto.FirstOrDefault(u =>
+                    u.ProductId == item.ProductId);
                     cart.CartHeader.CartTotal += (item.Count * item.Product.Price);
                 }
                 _response.Result = cart;
@@ -49,7 +54,7 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             }
             return _response;
         }
-            [HttpPost("CartUpsert")]
+        [HttpPost("CartUpsert")]
         public async Task<ResponseDto> CartUpsert(CartDto cartDto)
         {
             try
@@ -103,7 +108,6 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             }
             return _response;
         }
-
         [HttpPost("RemoveCart")]
         public async Task<ResponseDto> RemoveCart([FromBody] int cartDetailsId)
         {
