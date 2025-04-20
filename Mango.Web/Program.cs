@@ -16,6 +16,7 @@ ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProt
 // **Get API URL from Configuration**
 SD.CouponAPIBase = builder.Configuration["ServiceUrls:CouponAPI"];
 SD.AuthAPIBase = builder.Configuration["ServiceUrls:AuthAPI"];
+SD.ProductAPIBase = builder.Configuration["ServiceUrls:ProductAPI"];
 if (string.IsNullOrEmpty(SD.AuthAPIBase))
 {
     Console.WriteLine("⚠️ Error: CouponAPI Base URL is missing in configuration.");
@@ -52,6 +53,8 @@ else
 builder.Services.AddHttpClient<IAuthService, AuthService>();
 builder.Services.AddHttpClient<ICouponService, CouponService>()
     .ConfigurePrimaryHttpMessageHandler(() => httpClientHandler);
+builder.Services.AddHttpClient<IProductService, ProductService>()
+    .ConfigurePrimaryHttpMessageHandler(() => httpClientHandler);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -60,7 +63,7 @@ builder.Services.AddScoped<ITokenProvider, TokenProvider>();
 builder.Services.AddScoped<IBaseService, BaseService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
-
+builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
